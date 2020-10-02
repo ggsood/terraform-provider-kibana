@@ -1,0 +1,17 @@
+terraform-provider-kibana
+Copyright 2020 Elasticsearch B.V.
+
+This product includes software developed at Elasticsearch B.V. and
+third-party software developed by the licenses listed below.
+
+=========================================================================
+
+github.com/pkg/errors                          BSD-2-Clause
+github.com/ggsood/go-kibana-rest/v7            MIT
+github.com/onsi/ginkgo                         MIT
+github.com/onsi/gomega                         MIT
+github.com/sirupsen/logrus                     MIT
+github.com/x-cray/logrus-prefixed-formatter    MIT
+github.com/hashicorp/terraform-plugin-sdk      MPL-2.0
+
+=========================================================================

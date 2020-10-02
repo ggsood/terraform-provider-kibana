@@ -28,7 +28,7 @@ jobs:
           ELASTICSEARCH_HOSTS: http://es:9200
           ELASTICSEARCH_USERNAME: elastic
           ELASTICSEARCH_PASSWORD: changeme
-    working_directory: /go/src/github.com/disaster37/terraform-provider-kibana
+    working_directory: /go/src/github.com/ggsood/terraform-provider-kibana
     steps:
       - checkout
       - run: until $(curl --output /dev/null --silent --head --fail -u elastic:changeme http://kb:5601); do sleep 5; done
@@ -43,7 +43,7 @@ jobs:
       - image: circleci/golang:1.12
         environment:
           - GO111MODULE: "on"
-    working_directory: /go/src/github.com/disaster37/terraform-provider-kibana
+    working_directory: /go/src/github.com/ggsood/terraform-provider-kibana
     steps:
       - checkout
       - run: make build
@@ -56,7 +56,7 @@ jobs:
           - CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME
           - CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME
           - CIRCLE_TAG: $CIRCLE_TAG
-    working_directory: /go/src/github.com/disaster37/terraform-provider-kibana
+    working_directory: /go/src/github.com/ggsood/terraform-provider-kibana
     steps:
       - checkout
       - run: go get github.com/mitchellh/gox

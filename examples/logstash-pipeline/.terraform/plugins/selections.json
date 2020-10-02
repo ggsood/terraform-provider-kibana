@@ -1,0 +1,10 @@
+{
+  "registry.terraform.io/ggsood/kibana": {
+    "hash": "h1:j+iLBE0pq3BvDN6IuGXqMcvlAkYyABaKkTo9pnnaKlk=",
+    "version": "0.0.1"
+  },
+  "registry.terraform.io/hashicorp/template": {
+    "hash": "h1:a61DkglpoCGihJWQDBO0wJovPKXm9K6GLau2l+Q6EdA=",
+    "version": "2.1.2"
+  }
+}

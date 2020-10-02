@@ -12,5 +12,11 @@
 *.out
 
 dist/
+bin
 
 coverage.txt
+.idea
+.vscode
+
+**.terraform.tfstate
+**.terraform.tfstate*

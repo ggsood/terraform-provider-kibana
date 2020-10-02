@@ -1,6 +1,6 @@
 # terraform-provider-kibana
 
-This repository is a fork of **disaster37** https://github.com/disaster37/terraform-provider-kibana
+This repository is a fork of **disaster37** https://github.com/disaster37/terraform-provider-kibana with API Changes.
 
 [![CircleCI](https://circleci.com/gh/disaster37/terraform-provider-kibana/tree/7.x.svg?style=svg)](https://circleci.com/gh/disaster37/terraform-provider-kibana/tree/7.x)
 [![Go Report Card](https://goreportcard.com/badge/github.com/disaster37/terraform-provider-kibana)](https://goreportcard.com/report/github.com/disaster37/terraform-provider-kibana)
