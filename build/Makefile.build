@@ -9,7 +9,6 @@ PLUGIN_0.13 ?= registry.terraform.io/ggsood/kibana/$(VERSION)/$(shell uname -s|t
 gen:
 	@ echo "-> Generating files..."
 	@ go generate ./...
-	@ $(MAKE) license-header
 
 generate: gen
 

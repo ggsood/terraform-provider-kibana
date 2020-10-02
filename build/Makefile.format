@@ -2,14 +2,9 @@
 .PHONY: format
 format: deps tools
 	@ echo "-> Formatting Go files..."
-	@ $(MAKE) license-header
 	@ $(GOBIN)/golangci-lint run --fix
 	@ $(GOBIN)/tfproviderlint -fix ./...
 	@ echo "-> Formatting Terraform documentation blocks..."
 	@ find ./docs -type f -name "*.md" -exec $(GOBIN)/terrafmt fmt -f {} \;
 	@ terraform fmt -write=true -recursive
 	@ echo "-> Done."
-
-.PHONY: license-header
-license-header: deps
-	@ $(GOBIN)/go-licenser -license ASL2

@@ -1,6 +1,6 @@
 ## Lints all of the source files
 .PHONY: lint
-lint: golint golangci-lint check-license tfproviderlint tfproviderdocs terrafmt fmt
+lint: golint golangci-lint tfproviderlint tfproviderdocs terrafmt fmt
 
 .PHONY: tfproviderlint
 tfproviderlint: tools
@@ -11,11 +11,6 @@ tfproviderlint: tools
 tfproviderdocs: tools
 	@ echo "-> Running terraform provider docs check..."
 	@ $(GOBIN)/tfproviderdocs check -provider-name $(BINARY) .
-
-.PHONY: check-license
-check-license: deps
-	@ echo "-> Running license check..."
-	@ $(GOBIN)/go-licenser -license ASL2 -d .
 
 .PHONY: golangci-lint
 golangci-lint: deps
