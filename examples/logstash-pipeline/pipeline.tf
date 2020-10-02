@@ -10,9 +10,9 @@ terraform {
 }
 
 provider "kibana" {
-    url     = "https://85f6897b74b547c9ae458285bcb09d1a.eu-west-2.aws.cloud.es.io:9243" // remember trailing slash
-    username = "rbac-user"
-    password = "X39vWeYn6hK5Ct6"
+    url     = "" // remember trailing slash
+    username = ""
+    password = ""
 }
 
 data "template_file" "sample_pipeline" {
