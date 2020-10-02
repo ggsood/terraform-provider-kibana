@@ -144,7 +144,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	nbFailed := 0
 	isOnline := false
 	var kibanaStatus kbapi.KibanaStatus
-	for isOnline {
+	for isOnline == false {
 		kibanaStatus, err = client.API.KibanaStatus.Get()
 		if err == nil {
 			isOnline = true
