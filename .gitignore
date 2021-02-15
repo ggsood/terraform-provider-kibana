@@ -20,3 +20,4 @@ coverage.txt
 
 **.terraform.tfstate
 **.terraform.tfstate*
+**/.terraform
