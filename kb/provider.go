@@ -13,6 +13,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type ProviderConf struct {
+	rawUrl          string
+	insecure        bool
+	caCertFiles     []string
+	username        string
+	password        string
+	parsedUrl       *url.URL
+	maxRetry        int
+	waitBeforeRetry int
+	debug           bool
+}
+
 // Provider define kibana provider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
@@ -82,40 +94,39 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-
-	var (
-		relevantClient interface{}
-	)
-
-	URL := d.Get("url").(string)
-	insecure := d.Get("insecure").(bool)
-	cacertFiles := convertArrayInterfaceToArrayString(d.Get("cacert_files").(*schema.Set).List())
-	username := d.Get("username").(string)
-	password := d.Get("password").(string)
-	retry := d.Get("retry").(int)
-	waitBeforeRetry := d.Get("wait_before_retry").(int)
-	debug := d.Get("debug").(bool)
-
-	if debug {
-		log.SetLevel(log.DebugLevel)
-	}
-
-	// Checks is valid URL
-	if _, err := url.Parse(URL); err != nil {
+	rawUrl := d.Get("url").(string)
+	parsedUrl, err := url.Parse(rawUrl)
+	if err != nil {
 		return nil, err
 	}
 
-	// Intialise connexion
+	return &ProviderConf{
+		rawUrl:          rawUrl,
+		insecure:        d.Get("insecure").(bool),
+		caCertFiles:     convertArrayInterfaceToArrayString(d.Get("cacert_files").(*schema.Set).List()),
+		username:        d.Get("username").(string),
+		password:        d.Get("password").(string),
+		parsedUrl:       parsedUrl,
+		maxRetry:        d.Get("retry").(int),
+		waitBeforeRetry: d.Get("wait_before_retry").(int),
+		debug:           d.Get("debug").(bool),
+	}, nil
+}
+
+func getClient(conf *ProviderConf) (*kibana.Client, error) {
+	if conf.debug {
+		log.SetLevel(log.DebugLevel)
+	}
+
+	// Intialise connection
 	cfg := kibana.Config{
-		Address: URL,
-		CAs:     cacertFiles,
+		Address:          conf.rawUrl,
+		CAs:              conf.caCertFiles,
+		DisableVerifySSL: conf.insecure,
 	}
-	if username != "" && password != "" {
-		cfg.Username = username
-		cfg.Password = password
-	}
-	if insecure {
-		cfg.DisableVerifySSL = true
+	if conf.username != "" && conf.password != "" {
+		cfg.Username = conf.username
+		cfg.Password = conf.password
 	}
 
 	client, err := kibana.NewClient(cfg)
@@ -123,7 +134,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, err
 	}
 
-	// Test connexion and check kibana version
+	// Test connection and check kibana version
 	nbFailed := 0
 	isOnline := false
 	var kibanaStatus kbapi.KibanaStatus
@@ -132,27 +143,27 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		if err == nil {
 			isOnline = true
 		} else {
-			if nbFailed == retry {
+			if nbFailed == conf.maxRetry {
 				return nil, err
 			}
 			nbFailed++
-			time.Sleep(time.Duration(waitBeforeRetry) * time.Second)
+			time.Sleep(time.Duration(conf.waitBeforeRetry) * time.Second)
 		}
 	}
 
 	if kibanaStatus == nil {
-		return nil, errors.New("Status is empty, somethink wrong with Kibana ?")
+		return nil, errors.New("Status is empty, something wrong with Kibana?")
 	}
 
 	version := kibanaStatus["version"].(map[string]interface{})["number"].(string)
 	log.Debugf("Server: %s", version)
 
-	if version < "8.0.0" && version >= "7.0.0" {
-		log.Printf("[INFO] Using Kibana 7")
-		relevantClient = client
-	} else {
+	if version < "7.0.0" {
 		return nil, errors.New("Kibana is older than 7.0.0")
+	} else if version >= "8.0.0" {
+		return nil, errors.New("Kibana is version 8.0.0 or newer and support has not been tested")
 	}
 
-	return relevantClient, nil
+	log.Printf("[INFO] Using Kibana 7")
+	return client, nil
 }
