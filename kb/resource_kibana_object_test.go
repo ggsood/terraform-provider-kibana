@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
@@ -51,7 +50,11 @@ func testCheckKibanaObjectExists(name string) resource.TestCheckFunc {
 
 		meta := testAccProvider.Meta()
 
-		client := meta.(*kibana.Client)
+		client, err := getClient(meta.(*ProviderConf))
+		if err != nil {
+			return err
+		}
+
 		data, err := client.API.KibanaSavedObject.Export(nil, exportObjects, deepReference, space)
 		if err != nil {
 			return err

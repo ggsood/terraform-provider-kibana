@@ -8,7 +8,6 @@ package kb
 import (
 	"fmt"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
 	"github.com/ggsood/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -186,7 +185,10 @@ func copyObject(d *schema.ResourceData, meta interface{}) error {
 	log.Debugf("Include reference: %t", includeReference)
 	log.Debugf("Overwrite: %t", overwrite)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	objectsParameter := make([]kbapi.KibanaSpaceObjectParameter, 0, 1)
 	for _, object := range objects {
@@ -203,7 +205,7 @@ func copyObject(d *schema.ResourceData, meta interface{}) error {
 		Overwrite:         overwrite,
 	}
 
-	err := client.API.KibanaSpaces.CopySavedObjects(parameter, sourceSpace)
+	err = client.API.KibanaSpaces.CopySavedObjects(parameter, sourceSpace)
 	if err != nil {
 		return err
 	}
