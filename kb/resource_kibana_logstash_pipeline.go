@@ -8,7 +8,6 @@ package kb
 import (
 	"fmt"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
 	kbapi "github.com/ggsood/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -79,7 +78,10 @@ func resourceKibanaLogstashPipelineRead(d *schema.ResourceData, meta interface{}
 
 	log.Debugf("Logstash pipeline id:  %s", id)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	logstashPiepeline, err := client.API.KibanaLogstashPipeline.Get(id)
 	if err != nil {
@@ -125,9 +127,12 @@ func resourceKibanaLogstashPipelineDelete(d *schema.ResourceData, meta interface
 	id := d.Id()
 	log.Debugf("Logstash pipeline id: %s", id)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
-	err := client.API.KibanaLogstashPipeline.Delete(id)
+	err = client.API.KibanaLogstashPipeline.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
 			fmt.Printf("[WARN] Logstash pipeline %s not found - removing from state", id)
@@ -153,7 +158,10 @@ func createOrUpdateLogstashPipeline(d *schema.ResourceData, meta interface{}) (*
 	pipeline := d.Get("pipeline").(string)
 	settings := d.Get("settings").(map[string]interface{})
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return nil, err
+	}
 
 	logstashPipeline := &kbapi.LogstashPipeline{
 		ID:          name,
@@ -162,7 +170,7 @@ func createOrUpdateLogstashPipeline(d *schema.ResourceData, meta interface{}) (*
 		Settings:    settings,
 	}
 
-	logstashPipeline, err := client.API.KibanaLogstashPipeline.CreateOrUpdate(logstashPipeline)
+	logstashPipeline, err = client.API.KibanaLogstashPipeline.CreateOrUpdate(logstashPipeline)
 	if err != nil {
 		return nil, err
 	}

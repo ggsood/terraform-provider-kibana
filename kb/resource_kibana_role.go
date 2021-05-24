@@ -8,7 +8,6 @@ package kb
 import (
 	"fmt"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
 	kbapi "github.com/ggsood/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -164,7 +163,10 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Debugf("Role id:  %s", id)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	role, err := client.API.KibanaRoleManagement.Get(id)
 	if err != nil {
@@ -210,9 +212,12 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	id := d.Id()
 	log.Debugf("Role id: %s", id)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
-	err := client.API.KibanaRoleManagement.Delete(id)
+	err = client.API.KibanaRoleManagement.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
 			fmt.Printf("[WARN] Role %s not found - removing from state", id)
@@ -238,7 +243,10 @@ func createRole(d *schema.ResourceData, meta interface{}) error {
 	roleElasticsearch := buildRolesElasticsearch(d.Get("elasticsearch").(*schema.Set).List())
 	roleKibana := buildRolesKibana(d.Get("kibana").(*schema.Set).List())
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	var metadata map[string]interface{}
 	if metadataTemp != nil {
@@ -253,7 +261,7 @@ func createRole(d *schema.ResourceData, meta interface{}) error {
 		Metadata:      metadata,
 	}
 
-	_, err := client.API.KibanaRoleManagement.CreateOrUpdate(role)
+	_, err = client.API.KibanaRoleManagement.CreateOrUpdate(role)
 	if err != nil {
 		return err
 	}

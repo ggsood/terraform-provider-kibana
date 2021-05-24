@@ -8,8 +8,6 @@ package kb
 import (
 	"fmt"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	log "github.com/sirupsen/logrus"
 )
@@ -101,7 +99,10 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 	log.Debugf("Export Objects: %+v", exportObjects)
 	log.Debugf("Space: %s", space)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	data, err := client.API.KibanaSavedObject.Export(exportTypes, exportObjects, deepReference, space)
 	if err != nil {
@@ -183,7 +184,10 @@ func importObject(d *schema.ResourceData, meta interface{}) error {
 		err          error
 	)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	importedData, err = client.API.KibanaSavedObject.Import([]byte(data), true, space)
 	if err != nil {

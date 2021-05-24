@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
@@ -47,7 +46,10 @@ func testCheckKibanaRoleExists(name string) resource.TestCheckFunc {
 
 		meta := testAccProvider.Meta()
 
-		client := meta.(*kibana.Client)
+		client, err := getClient(meta.(*ProviderConf))
+		if err != nil {
+			return err
+		}
 		role, err := client.API.KibanaRoleManagement.Get(rs.Primary.ID)
 		if err != nil {
 			return err
@@ -68,7 +70,11 @@ func testCheckKibanaRoleDestroy(s *terraform.State) error {
 
 		meta := testAccProvider.Meta()
 
-		client := meta.(*kibana.Client)
+		client, err := getClient(meta.(*ProviderConf))
+		if err != nil {
+			return err
+		}
+
 		role, err := client.API.KibanaRoleManagement.Get(rs.Primary.ID)
 		if err != nil {
 			return err

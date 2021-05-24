@@ -8,7 +8,6 @@ package kb
 import (
 	"fmt"
 
-	kibana "github.com/ggsood/go-kibana-rest/v7"
 	kbapi "github.com/ggsood/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -64,7 +63,10 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 	initials := d.Get("initials").(string)
 	color := d.Get("color").(string)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	userSpace := &kbapi.KibanaSpace{
 		ID:               name,
@@ -75,7 +77,7 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 		Color:            color,
 	}
 
-	_, err := client.API.KibanaSpaces.Create(userSpace)
+	_, err = client.API.KibanaSpaces.Create(userSpace)
 	if err != nil {
 		return err
 	}
@@ -94,7 +96,10 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 
 	log.Debugf("User space id:  %s", id)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
 	userSpace, err := client.API.KibanaSpaces.Get(id)
 	if err != nil {
@@ -129,7 +134,11 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 	initials := d.Get("initials").(string)
 	color := d.Get("color").(string)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
+
 	userSpace := &kbapi.KibanaSpace{
 		ID:               id,
 		Name:             id,
@@ -139,7 +148,7 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 		Color:            color,
 	}
 
-	_, err := client.API.KibanaSpaces.Update(userSpace)
+	_, err = client.API.KibanaSpaces.Update(userSpace)
 	if err != nil {
 		return err
 	}
@@ -155,9 +164,12 @@ func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) err
 	id := d.Id()
 	log.Debugf("User space id: %s", id)
 
-	client := meta.(*kibana.Client)
+	client, err := getClient(meta.(*ProviderConf))
+	if err != nil {
+		return err
+	}
 
-	err := client.API.KibanaSpaces.Delete(id)
+	err = client.API.KibanaSpaces.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
 			fmt.Printf("[WARN] User space %s not found - removing from state", id)
@@ -173,5 +185,4 @@ func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) err
 
 	log.Infof("Deleted user space %s successfully", id)
 	return nil
-
 }
